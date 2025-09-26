@@ -537,6 +537,106 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // GitHub routes
+  app.post("/api/github/clone", authenticate, async (req: any, res) => {
+    try {
+      const { repoUrl, clonePath } = req.body;
+
+      if (!repoUrl) {
+        return res.status(400).json({ message: "Repository URL is required" });
+      }
+
+      // Validate GitHub URL
+      const githubPattern = /^https?:\/\/(www\.)?github\.com\/[\w\-\.]+\/[\w\-\.]+\/?(\?.*)?$/;
+      if (!githubPattern.test(repoUrl)) {
+        return res.status(400).json({ message: "Invalid GitHub repository URL" });
+      }
+
+      // Extract repo name for default path
+      const repoName = repoUrl.split('/').pop()?.replace('.git', '') || 'repository';
+      const finalPath = clonePath || `./projects/${repoName}`;
+
+      // Import child_process dynamically
+      const { exec } = await import('child_process');
+      const { promisify } = await import('util');
+      const execAsync = promisify(exec);
+
+      try {
+        // Execute git clone command
+        const command = `git clone "${repoUrl}" "${finalPath}"`;
+        const { stdout, stderr } = await execAsync(command);
+
+        // Log the clone operation (in a real app, you might want to store this in a database)
+        console.log(`Repository cloned by user ${req.user.id}: ${repoUrl} -> ${finalPath}`);
+
+        res.status(201).json({
+          message: "Repository cloned successfully",
+          path: finalPath,
+          repoUrl,
+          output: stdout,
+          timestamp: new Date().toISOString()
+        });
+      } catch (gitError: any) {
+        console.error('Git clone error:', gitError);
+        
+        // Handle common git errors
+        let errorMessage = "Failed to clone repository";
+        if (gitError.message.includes("not found")) {
+          errorMessage = "Repository not found or access denied";
+        } else if (gitError.message.includes("already exists")) {
+          errorMessage = "Directory already exists";
+        } else if (gitError.message.includes("permission denied")) {
+          errorMessage = "Permission denied";
+        }
+
+        res.status(400).json({ 
+          message: errorMessage,
+          details: gitError.message
+        });
+      }
+    } catch (error) {
+      console.error('Clone operation error:', error);
+      res.status(500).json({ message: "Failed to clone repository" });
+    }
+  });
+
+  // Get GitHub projects (mock data for now)
+  app.get("/api/github-projects", authenticate, async (req: any, res) => {
+    try {
+      // In a real implementation, this would fetch from a database or GitHub API
+      const mockProjects = [
+        {
+          id: 1,
+          name: "disaster-relief-tracker",
+          description: "Real-time disaster response coordination system",
+          url: "https://github.com/lumina-org/disaster-relief-tracker",
+          language: "TypeScript",
+          stars: 89,
+          forks: 23,
+          status: "Active",
+          userId: req.user.id,
+          createdAt: new Date().toISOString()
+        },
+        {
+          id: 2,
+          name: "food-distribution-app",
+          description: "Mobile app for coordinating food distribution to communities in need",
+          url: "https://github.com/lumina-org/food-distribution-app",
+          language: "React Native",
+          stars: 156,
+          forks: 41,
+          status: "Active",
+          userId: req.user.id,
+          createdAt: new Date().toISOString()
+        }
+      ];
+
+      res.json(mockProjects);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch GitHub projects" });
+    }
+  });
+
   const httpServer = createServer(app);
 
   // Set up WebSocket for real-time updates
