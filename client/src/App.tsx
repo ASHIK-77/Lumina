@@ -18,6 +18,7 @@ import Clothing from "@/pages/categories/Clothing";
 import Events from "@/pages/categories/Events";
 import Homes from "@/pages/categories/Homes";
 import Disaster from "@/pages/categories/Disaster";
+import Developers from "@/pages/categories/Developers";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -37,6 +38,7 @@ function Router() {
       <Route path="/events" component={Events} />
       <Route path="/homes" component={Homes} />
       <Route path="/disaster" component={Disaster} />
+      <Route path="/developers" component={Developers} />
       <Route component={NotFound} />
     </Switch>
   );

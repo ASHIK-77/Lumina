@@ -20,6 +20,7 @@ import {
   Calendar,
   Home as HomeIcon,
   AlertTriangle,
+  Code,
 } from "lucide-react";
 
 // ✅ Category data added back
@@ -104,6 +105,19 @@ const categoryData = [
     imageUrl:
       "https://images.unsplash.com/photo-1581833971358-2c8b550f87b3?auto=format&fit=crop&w=600&q=400",
     tags: ["Active Relief Efforts: 3"],
+  },
+  {
+    key: "developers",
+    title: "Tech Volunteers & Developers",
+    description:
+      "Contribute your coding skills to build technology solutions for disaster relief, community support, and charitable initiatives. Clone GitHub repositories and collaborate on open source projects.",
+    icon: Code,
+    color: "bg-blue-50 text-blue-700 dark:bg-blue-900 dark:text-blue-300",
+    actionText: "Start Coding",
+    href: "/developers",
+    imageUrl:
+      "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=600&q=400",
+    tags: ["Open Source", "GitHub Integration"],
   },
 ];
 
